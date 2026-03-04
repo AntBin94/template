@@ -71,6 +71,7 @@ class UsersPublic(SQLModel):
 class ItemBase(SQLModel):
     title: str = Field(min_length=1, max_length=255)
     description: str | None = Field(default=None, max_length=255)
+    marca: str | None= Field(default=None, max_length=255)
 
 
 # Properties to receive on item creation
@@ -94,7 +95,7 @@ class Item(ItemBase, table=True):
         foreign_key="user.id", nullable=False, ondelete="CASCADE"
     )
     owner: User | None = Relationship(back_populates="items")
-
+  
 
 # Properties to return via API, id is always required
 class ItemPublic(ItemBase):
@@ -127,3 +128,9 @@ class TokenPayload(SQLModel):
 class NewPassword(SQLModel):
     token: str
     new_password: str = Field(min_length=8, max_length=128)
+
+
+class Producto(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    nombre: str
+    precio: float
