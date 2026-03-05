@@ -95,7 +95,6 @@ class Item(ItemBase, table=True):
         foreign_key="user.id", nullable=False, ondelete="CASCADE"
     )
     owner: User | None = Relationship(back_populates="items")
-  
 
 # Properties to return via API, id is always required
 class ItemPublic(ItemBase):
@@ -134,3 +133,4 @@ class Producto(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     nombre: str
     precio: float
+    tamano: float 
