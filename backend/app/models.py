@@ -1,3 +1,4 @@
+from jwt.algorithms import NoneAlgorithm
 import uuid
 from datetime import datetime, timezone
 
@@ -54,6 +55,7 @@ class User(UserBase, table=True):
         sa_type=DateTime(timezone=True),  # type: ignore
     )
     items: list["Item"] = Relationship(back_populates="owner", cascade_delete=True)
+    libros: list["Libro"] = Relationship(back_populates="creador", cascade_delete=True)
 
 
 # Properties to return via API, id is always required
@@ -129,8 +131,73 @@ class NewPassword(SQLModel):
     new_password: str = Field(min_length=8, max_length=128)
 
 
-class Producto(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True)
-    nombre: str
+# Shared properties
+class ProductoBase(SQLModel):
+    nombre: str = Field(min_length=1, max_length=255)
     precio: float
-    tamano: float 
+    tamano: float
+
+# Properties to receive on producto creation
+class ProductoCreate(ProductoBase):
+    pass
+
+# Properties to receive on producto update
+class ProductoUpdate(ProductoBase):
+    nombre: str | None = Field(default=None, min_length=1, max_length=255)  # type: ignore
+    precio: float | None = None
+    tamano: float | None = None
+
+# Database model, database table inferred from class name
+class Producto(ProductoBase, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    created_at: datetime | None = Field(
+        default_factory=get_datetime_utc,
+        sa_type=DateTime(timezone=True),  # type: ignore
+    )
+
+# Properties to return via API, id is always required
+class ProductoPublic(ProductoBase):
+    id: int
+    created_at: datetime | None = None
+
+class ProductosPublic(SQLModel):
+    data: list[ProductoPublic]
+    count: int
+
+# Creamos los campos base de la tabla
+class LibroBase (SQLModel):
+    isbn: int = Field(min_length=10, max_length=13)
+    titulo: str = Field(min_length=1, max_length=255)
+    autor: str = Field(min_length=1, max_length=255)
+    editorial: str = Field(min_length=1, max_length=255)
+    precio: float
+
+# En esta recibimos los datos cuando creamos un nuevo producto
+class LibroCrear(LibroBase):
+    pass
+
+# Aquí es para actualizar los datos del libro
+class LibroActualizar(LibroBase):
+    autor: str | None = Field(default=None, min_length=1, max_length=255)
+    editorial: str | None = Field(default=None, min_length=1, max_length=255)
+    precio: float | None = None
+
+# Aquí ya definimos la tabla que se creará en la base de datos
+class Libro(LibroBase, table=True):
+     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+     creador_id: uuid.UUID = Field(
+        foreign_key="user.id", nullable=False, ondelete="CASCADE"
+    )
+     creador: User | None = Relationship(back_populates="libros")
+
+# Aqui van las clases que devuelven la 
+# información al response de la api, 
+# el id siempre es requerido
+class LibroPublico(LibroBase):
+    id: uuid.UUID
+    creador_id: uuid.UUID
+
+class LibrosPublicos(SQLModel):
+    datos: list[LibroPublico]
+    contador: int
+
