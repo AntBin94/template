@@ -190,8 +190,8 @@ class Libro(LibroBase, table=True):
     )
      creador: User | None = Relationship(back_populates="libros")
 
-# Aqui van las clases que devuelven la 
-# información al response de la api, 
+# Aqui van las clases que devuelven la
+# información al response de la api,
 # el id siempre es requerido
 class LibroPublico(LibroBase):
     id: uuid.UUID
