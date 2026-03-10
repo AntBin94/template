@@ -166,7 +166,7 @@ class ProductosPublic(SQLModel):
 
 # Creamos los campos base de la tabla
 class LibroBase (SQLModel):
-    isbn: int = Field(min_length=10, max_length=13)
+    isbn: str = Field(min_length=10, max_length=13, regex="^\\d{10,13}$")
     titulo: str = Field(min_length=1, max_length=255)
     autor: str = Field(min_length=1, max_length=255)
     editorial: str = Field(min_length=1, max_length=255)

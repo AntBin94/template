@@ -1,21 +1,29 @@
+import uuid
+
 from fastapi.testclient import TestClient
 from app.main import app
+
+from app.core.config import settings
+from tests.utils.libro import crear_libro_random
 
 client = TestClient(app)
 
 # Test para crear un libro vía endpoint
 # Este test verifica que el endpoint /libros/ permite crear un libro correctamente.
-def test_post_libro():
-    """
-    Envía una petición POST para crear un libro y verifica que la respuesta sea correcta.
-    """
-    response = client.post("/libros/", json={
+def test_post_libro(
+    client: TestClient, superuser_token_headers: dict[str, str]
+) -> None:
+    data = {
         "isbn": 1234567890123,
         "titulo": "El Quijote",
         "autor": "Cervantes",
         "editorial": "Espasa",
         "precio": 19.99
-    })
+        }
+    response = client.post(f"{settings.API_V1_STR}/libros/", 
+    headers = superuser_token_headers,
+    json=data
+    )
     assert response.status_code == 201  # Verifica el código de respuesta
     data = response.json()
     assert data["titulo"] == "El Quijote"  # Verifica el título

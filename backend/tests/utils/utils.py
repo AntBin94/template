@@ -24,3 +24,15 @@ def get_superuser_token_headers(client: TestClient) -> dict[str, str]:
     a_token = tokens["access_token"]
     headers = {"Authorization": f"Bearer {a_token}"}
     return headers
+
+#agregamos una función random para un ISBN
+def random_isbn() -> int:
+    """Devuelve un número aleatorio entre 10 y 13 dígitos."""
+    length = random.randint(10, 13)
+    return int("".join(random.choices("0123456789", k=length)))
+
+#agregamos una función para un float random
+def random_float(min_value: float = 0.0, max_value: float = 100.0) -> float:
+    """Devuelve un número float aleatorio entre 0 y 100"""
+    return random.uniform(min_value, max_value)
+    
