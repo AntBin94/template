@@ -26,10 +26,11 @@ def get_superuser_token_headers(client: TestClient) -> dict[str, str]:
     return headers
 
 #agregamos una función random para un ISBN
-def random_isbn() -> int:
-    """Devuelve un número aleatorio entre 10 y 13 dígitos."""
+def random_isbn() -> str:
+    """Devuelve un número aleatorio entre 10 y 13 dígitos pero sale 
+    como string."""
     length = random.randint(10, 13)
-    return int("".join(random.choices("0123456789", k=length)))
+    return "".join(random.choices("0123456789", k=length))
 
 #agregamos una función para un float random
 def random_float(min_value: float = 0.0, max_value: float = 100.0) -> float:

@@ -1,20 +1,18 @@
 import uuid
 
 from fastapi.testclient import TestClient
-from app.main import app
+from sqlmodel import Session
 
 from app.core.config import settings
 from tests.utils.libro import crear_libro_random
 
-client = TestClient(app)
-
 # Test para crear un libro vía endpoint
 # Este test verifica que el endpoint /libros/ permite crear un libro correctamente.
-def test_post_libro(
+def test_crear_libro(
     client: TestClient, superuser_token_headers: dict[str, str]
 ) -> None:
     data = {
-        "isbn": 1234567890123,
+        "isbn": "1234567890123",
         "titulo": "El Quijote",
         "autor": "Cervantes",
         "editorial": "Espasa",
@@ -24,29 +22,52 @@ def test_post_libro(
     headers = superuser_token_headers,
     json=data
     )
-    assert response.status_code == 201  # Verifica el código de respuesta
-    data = response.json()
-    assert data["titulo"] == "El Quijote"  # Verifica el título
-    assert data["autor"] == "Cervantes"    # Verifica el autor
+    assert response.status_code == 200  # Verifica el código de respuesta
+    content = response.json()
+    assert content["isbn"] == data["isbn"] #verifica el isbn
+    assert content["titulo"] == data["titulo"]  # Verifica el título
+    assert content["autor"] == data["autor"]    # Verifica el autor
+    assert content["editorial"] == data["editorial"] #verificamos la editorial
+    assert content["precio"] == data["precio"] #verificamos el precio
+    assert "id" in content 
+    assert "creador_id" in content
 
 # Test para obtener un libro vía endpoint
 # Este test verifica que el endpoint /libros/{id} permite recuperar un libro existente.
-def test_get_libro():
+def test_vemos_libro(
+    client: TestClient, superuser_token_headers: dict[str, str], db: Session
+) -> None:
     """
     Crea un libro y luego lo recupera por su ID usando el endpoint.
     """
-    post_response = client.post("/libros/", json={
-        "isbn": 1234567890123,
-        "titulo": "El Quijote",
-        "autor": "Cervantes",
-        "editorial": "Espasa",
-        "precio": 19.99
-    })
-    libro_id = post_response.json()["id"]
-    get_response = client.get(f"/libros/{libro_id}")
-    assert get_response.status_code == 200
-    data = get_response.json()
-    assert data["titulo"] == "El Quijote"
+    libro = crear_libro_random(db)
+    response = client.get(
+        f"{settings.API_V1_STR}/libros/{libro.id}",
+        headers=superuser_token_headers,
+       )
+    assert response.status_code == 200
+    content = response.json()
+    assert content["isbn"]== libro.isbn
+    assert content["titulo"]== libro.titulo
+    assert content["autor"]== libro.autor
+    assert content["editorial"]== libro.editorial
+    assert content["id"] == str(libro.id)
+    assert content["creador_id"] == str(libro.creador_id)
+
+#test para obtener todos los libros vía endpoint
+#Este test permite verificar el endpoint /libros/
+def test_vemos_libros(
+    client: TestClient, superuser_token_headers: dict[str, str], db:Session
+) -> None:
+    crear_libro_random(db)
+    crear_libro_random(db)
+    response = client.get(
+        f"{settings.API_V1_STR}/libros/",
+        headers=superuser_token_headers,
+    )
+    assert response.status_code == 200
+    content= response.json()
+    assert len(content["datos"]) >=2
 
 # Test para actualizar un libro vía endpoint
 # Este test verifica que el endpoint PATCH /libros/{id} permite actualizar datos de un libro.

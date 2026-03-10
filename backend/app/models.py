@@ -1,8 +1,9 @@
 from jwt.algorithms import NoneAlgorithm
 import uuid
 from datetime import datetime, timezone
+from typing import Annotated
 
-from pydantic import EmailStr
+from pydantic import EmailStr, StringConstraints
 from sqlalchemy import DateTime
 from sqlmodel import Field, Relationship, SQLModel
 
@@ -166,7 +167,7 @@ class ProductosPublic(SQLModel):
 
 # Creamos los campos base de la tabla
 class LibroBase (SQLModel):
-    isbn: str = Field(min_length=10, max_length=13, regex="^\\d{10,13}$")
+    isbn: Annotated[str, StringConstraints(min_length=10, max_length=13, pattern=r"^\d{10,13}$")]
     titulo: str = Field(min_length=1, max_length=255)
     autor: str = Field(min_length=1, max_length=255)
     editorial: str = Field(min_length=1, max_length=255)
