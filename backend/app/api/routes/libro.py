@@ -62,8 +62,8 @@ def leer_libro(session: SessionDep, current_user: CurrentUser, id: uuid.UUID) ->
     return libro
 
 #Buscamos el libro por su ISBN
-@router.get("/buscar_por_isbn/{isbn}", response_model=LibroPublico)
-def leer_libro_por_isbn(session: SessionDep, current_user: CurrentUser, isbn: int) -> Any:
+@router.get("/buscar_por_isbn/{isbn}", response_model=LibrosPublicos)
+def leer_libro_por_isbn(session: SessionDep, current_user: CurrentUser, isbn: str) -> Any:
     """
     Obtener libros por el ISBN.
     """
